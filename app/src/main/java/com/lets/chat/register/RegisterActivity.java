@@ -13,19 +13,28 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.lets.chat.MainActivity;
 import com.lets.chat.R;
 import com.lets.chat.utility.Utility;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
     EditText edt_name, edt_email, edt_password;
     Button btn_register;
     Toolbar toolbar;
     ProgressDialog progressDialog;
+
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
 
     Utility utility;
 
@@ -50,6 +59,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         progressDialog.setCanceledOnTouchOutside(false);
 
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("users");
 
         utility = new Utility(this);
 
@@ -93,16 +103,32 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     }
 
-    private void registerUser(String name, String email, String password) {
+    private void registerUser(final String name, String email, String password) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            progressDialog.dismiss();
-                            Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                            startActivity(intent);
+                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                            if (currentUser != null) {
+                                String userID = currentUser.getUid();
+                                Map<String, String> map = new HashMap<>();
+                                map.put("name", name);
+                                map.put("status", "Your status goes here");
+                                map.put("image", "placeHolder");
+                                map.put("thumb_image", "default");
+
+                                mDatabase.child(userID).setValue(map).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        progressDialog.dismiss();
+                                        Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                        startActivity(intent);
+                                    }
+                                });
+                            }
+
                         } else {
                             progressDialog.hide();
                             Toast.makeText(RegisterActivity.this, "failed",
