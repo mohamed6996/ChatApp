@@ -28,6 +28,7 @@ public class AllUsers extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         reference = FirebaseDatabase.getInstance().getReference().child("users");
+        reference.keepSynced(true);
 
     }
 

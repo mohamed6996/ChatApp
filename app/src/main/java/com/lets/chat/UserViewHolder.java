@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -17,6 +18,7 @@ public class UserViewHolder extends RecyclerView.ViewHolder {
 
     public UserViewHolder(View itemView) {
         super(itemView);
+
 
         user_image = (CircleImageView) itemView.findViewById(R.id.user_image);
         user_name = (TextView) itemView.findViewById(R.id.user_display_name);

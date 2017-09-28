@@ -74,6 +74,7 @@ public class AccountSettings extends AppCompatActivity implements View.OnClickLi
 
         mCurrentUser = FirebaseAuth.getInstance().getCurrentUser();
         mDatabase = FirebaseDatabase.getInstance().getReference().child("users").child(mCurrentUser.getUid());
+        mDatabase.keepSynced(true);
         mDatabase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
