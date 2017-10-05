@@ -60,8 +60,9 @@ public class UserProfile extends AppCompatActivity implements View.OnClickListen
                 String name = dataSnapshot.child("name").getValue().toString();
                 String status = dataSnapshot.child("status").getValue().toString();
                 String image = dataSnapshot.child("image").getValue().toString();
+                String thumb_image = dataSnapshot.child("thumb_image").getValue().toString();
 
-                updateUi(name, status, image);
+                updateUi(name, status, image, thumb_image);
                 Log.i("INFO", name + status + image);
 
             }
@@ -126,10 +127,10 @@ public class UserProfile extends AppCompatActivity implements View.OnClickListen
         });
     }
 
-    private void updateUi(String name, String status, String image) {
+    private void updateUi(String name, String status, String image, String thumb_image) {
         user_name.setText(name);
         user_status.setText(status);
-        Picasso.with(this).load(image)
+        Picasso.with(this).load(thumb_image)
                 .placeholder(R.drawable.noun_323186_cc)
                 .into(user_pic);
 
@@ -220,7 +221,19 @@ public class UserProfile extends AppCompatActivity implements View.OnClickListen
                     request_database.child(user_id).child("friend_req").child(mAuth.getCurrentUser().getUid()).child("request_type").setValue("received").addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
+                          /*  request_database.child(user_id).child("notifications").push().child("from").setValue(mAuth.getCurrentUser().getUid()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
 
+                                }
+                            });*/
+
+                            request_database.child(user_id).child("notifications").child(mAuth.getCurrentUser().getUid()).setValue("received").addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+
+                                }
+                            });
                         }
                     });
                 }

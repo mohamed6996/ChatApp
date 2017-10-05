@@ -2,9 +2,9 @@ package com.lets.chat.register;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -24,6 +24,9 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.lets.chat.MainActivity;
 import com.lets.chat.R;
 import com.lets.chat.utility.GoogleConfig;
@@ -41,6 +44,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     SignInButton signInButton;
 
     private FirebaseAuth mAuth;
+    private DatabaseReference mDatabase;
 
     Utility utility;
 
@@ -66,6 +70,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         signInButton.setOnClickListener(this);
 
         mAuth = FirebaseAuth.getInstance();
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("users");
 
         mGoogleApiClient = new GoogleConfig(this).initConfig();
 
@@ -127,8 +132,20 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
 
 
                             if (task.isSuccessful()) {
-                                progressDialog.dismiss();
-                                senToMainActivity();
+
+
+                                String user_uid = mAuth.getCurrentUser().getUid();
+                                String user_token = FirebaseInstanceId.getInstance().getToken();
+
+                                mDatabase.child(user_uid).child("user_token").setValue(user_token).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        progressDialog.dismiss();
+                                        senToMainActivity();
+                                    }
+                                });
+
+
                             } else {
                                 progressDialog.hide();
                                 Toast.makeText(StartActivity.this, "failed",

@@ -5,16 +5,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.doctoror.particlesdrawable.ParticlesDrawable;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,8 +44,6 @@ public class AccountSettings extends AppCompatActivity implements View.OnClickLi
     TextView displayName, userStatus;
     ImageView edit_name, edit_status, edit_pic;
     CircleImageView circleImageView;
-    private final ParticlesDrawable mDrawable = new ParticlesDrawable();
-
 
     String name, status;
     Uri imageUri;
@@ -60,7 +58,7 @@ public class AccountSettings extends AppCompatActivity implements View.OnClickLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account_settings);
-      //  findViewById(R.id.particles).setBackground(mDrawable);
+        //  findViewById(R.id.particles).setBackground(mDrawable);
 
         displayName = (TextView) findViewById(R.id.settings_displayName);
         userStatus = (TextView) findViewById(R.id.profile_status);
@@ -99,38 +97,31 @@ public class AccountSettings extends AppCompatActivity implements View.OnClickLi
     }
 
 
-  /*  private void setProgressDialog() {
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Uploading Image");
-        progressDialog.setTitle("Please wait till we process the image");
-        progressDialog.setCanceledOnTouchOutside(false);
-       // progressDialog.show();
-
-    }*/
-
-  /*  @Override
-    protected void onStart() {
-        super.onStart();
-        mDrawable.start();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mDrawable.stop();
-    }*/
-
-
     private void updateUi(String name, String status, String image, String thumb_image) {
-        displayName.setText(name);
-        userStatus.setText(status);
+        if (!TextUtils.isEmpty(name)) {
+            displayName.setText(name);
+        }
+        if (!TextUtils.isEmpty(status)) {
+            userStatus.setText(status);
+        }
+
+
         // if image url is empty , apply the default avatar instead of empty image view
-        if (!image.equals("placeHolder")) {
+     /*   if (!TextUtils.isEmpty(image)) {
             Picasso.with(this)
                     .load(image)
                     .placeholder(R.drawable.noun_323186_cc)
                     .into(circleImageView);
+        }*/
+
+        if (!image.equals("default")) {
+            Picasso.with(this)
+                    .load(thumb_image)
+                    .placeholder(R.drawable.noun_323186_cc)
+                    .into(circleImageView);
         }
+
+
     }
 
     @Override
@@ -153,6 +144,66 @@ public class AccountSettings extends AppCompatActivity implements View.OnClickLi
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
         galleryIntent.setType("image/*");
         startActivityForResult(galleryIntent, GALLERY_REQ);
+    }
+
+    private void editName() {
+        final EditText input = new EditText(this);
+        input.setText(name);
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Edit Name")
+                .setMessage("")// to add more space
+                .setView(input)
+                .setPositiveButton("save", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String updated_name = input.getEditableText().toString().toString();
+                        mDatabase.child("name").setValue(updated_name).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(AccountSettings.this, "updated", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alert.create();
+        alertDialog.show();
+    }
+
+    private void editStatus() {
+        final EditText input = new EditText(this);
+        input.setText(status);
+
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        alert.setTitle("Edit Status")
+                .setMessage("")// to add more space
+                .setView(input)
+                .setPositiveButton("save", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String updated_status = input.getEditableText().toString().toString();
+                        mDatabase.child("status").setValue(updated_status).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Toast.makeText(AccountSettings.this, "updated", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.cancel();
+            }
+        });
+
+        AlertDialog alertDialog = alert.create();
+        alertDialog.show();
     }
 
     @Override
@@ -265,76 +316,4 @@ public class AccountSettings extends AppCompatActivity implements View.OnClickLi
     }
 
 
-  /*  public static String random() {
-        Random generator = new Random();
-        StringBuilder randomStringBuilder = new StringBuilder();
-        int randomLength = generator.nextInt(10);
-        char tempChar;
-        for (int i = 0; i < randomLength; i++) {
-            tempChar = (char) (generator.nextInt(96) + 32);
-            randomStringBuilder.append(tempChar);
-        }
-        return randomStringBuilder.toString();
-    }*/
-
-    private void editName() {
-        final EditText input = new EditText(this);
-        input.setText(name);
-
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Edit Name")
-                .setMessage("")// to add more space
-                .setView(input)
-                .setPositiveButton("save", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String updated_name = input.getEditableText().toString().toString();
-                        mDatabase.child("name").setValue(updated_name).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(AccountSettings.this, "updated", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-
-        AlertDialog alertDialog = alert.create();
-        alertDialog.show();
-    }
-
-
-    private void editStatus() {
-        final EditText input = new EditText(this);
-        input.setText(status);
-
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-        alert.setTitle("Edit Status")
-                .setMessage("")// to add more space
-                .setView(input)
-                .setPositiveButton("save", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String updated_status = input.getEditableText().toString().toString();
-                        mDatabase.child("status").setValue(updated_status).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                Toast.makeText(AccountSettings.this, "updated", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
-                }).setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
-
-        AlertDialog alertDialog = alert.create();
-        alertDialog.show();
-    }
 }

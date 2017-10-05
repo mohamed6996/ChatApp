@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.lets.chat.MainActivity;
 import com.lets.chat.R;
 import com.lets.chat.utility.Utility;
@@ -112,11 +113,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             FirebaseUser currentUser = mAuth.getCurrentUser();
                             if (currentUser != null) {
                                 String userID = currentUser.getUid();
+                                String user_token = FirebaseInstanceId.getInstance().getToken();
+
                                 Map<String, String> map = new HashMap<>();
                                 map.put("name", name);
                                 map.put("status", "Your status goes here");
-                                map.put("image", "placeHolder");
+                                map.put("image", "default");
                                 map.put("thumb_image", "default");
+                                map.put("user_token",user_token);
 
                                 mDatabase.child(userID).setValue(map).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
